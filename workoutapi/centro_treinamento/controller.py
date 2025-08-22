@@ -1,6 +1,7 @@
 from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, status
 from pydantic import UUID4
+from sqlalchemy.exc import IntegrityError
 from workoutapi.centro_treinamento.schemas import (
     CentroTreinamentoIn,
     CentroTreinamentoOut,
@@ -29,9 +30,19 @@ async def post(
     centro_treinamento_model = CentroTreinamentoModel(
         **centro_treinamento_out.model_dump()
     )
-
-    db_session.add(centro_treinamento_model)
-    await db_session.commit()
+    try:
+        db_session.add(centro_treinamento_model)
+        await db_session.commit()
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"O CT {centro_treinamento_in.nome} já foi cadastrado!",
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ocorreu um erro no banco de dados!",
+        )
 
     return centro_treinamento_out
 

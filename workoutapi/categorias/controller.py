@@ -5,6 +5,7 @@ from workoutapi.categorias.schemas import CategoriaIn, CategoriaOut
 from workoutapi.categorias.models import CategoriaModel
 from workoutapi.contrib.dependencies import DatabaseDependency
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 
 router = APIRouter()
@@ -23,9 +24,20 @@ async def post(
     categoria_out = CategoriaOut(id=uuid4(), **categoria_in.model_dump())
     categoria_model = CategoriaModel(**categoria_out.model_dump())
 
-    db_session.add(categoria_model)
-    await db_session.commit()
-
+    try:
+        db_session.add(categoria_model)
+        await db_session.commit()
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A categoria {categoria_in.nome} já foi cadastrado!",
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ocorreu um erro no banco de dados!",
+        )
+    
     return categoria_out
 
 

@@ -73,8 +73,8 @@ async def post(
         await db_session.commit()
     except IntegrityError as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Ocorreu um erro de integridade ao inserir os dados no banco\n{e}",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"O cpf {atleta_in.cpf} já foi cadastrado!",
         )
     except Exception:
         raise HTTPException(
