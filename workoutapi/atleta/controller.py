@@ -1,7 +1,9 @@
 from datetime import datetime
 from uuid import uuid4
 from fastapi import APIRouter, Body, HTTPException, status
+from fastapi_pagination import Page, add_pagination, paginate
 from pydantic import UUID4
+
 from workoutapi.atleta.schemas import AtletaIn, AtletaOut, AtletaUpdate
 from workoutapi.atleta.models import AtletaModel
 from workoutapi.categorias.models import CategoriaModel
@@ -73,7 +75,7 @@ async def post(
         await db_session.commit()
     except IntegrityError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_303_SEE_OTHER,
             detail=f"O cpf {atleta_in.cpf} já foi cadastrado!",
         )
     except Exception:

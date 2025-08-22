@@ -29,7 +29,7 @@ async def post(
         await db_session.commit()
     except IntegrityError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_303_SEE_OTHER,
             detail=f"A categoria {categoria_in.nome} já foi cadastrado!",
         )
     except Exception:
@@ -37,7 +37,7 @@ async def post(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Ocorreu um erro no banco de dados!",
         )
-    
+
     return categoria_out
 
 
@@ -62,9 +62,11 @@ async def query(db_session: DatabaseDependency) -> list[CategoriaOut]:
 )
 async def query(id: UUID4, db_session: DatabaseDependency) -> CategoriaOut:
     categoria: CategoriaOut = (
-        await db_session.execute(select(CategoriaModel).filter_by(id=id))
-    ).scalars().first()
-    
+        (await db_session.execute(select(CategoriaModel).filter_by(id=id)))
+        .scalars()
+        .first()
+    )
+
     if not categoria:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

@@ -35,7 +35,7 @@ async def post(
         await db_session.commit()
     except IntegrityError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_303_SEE_OTHER,
             detail=f"O CT {centro_treinamento_in.nome} já foi cadastrado!",
         )
     except Exception:
